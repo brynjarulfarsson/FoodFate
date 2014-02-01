@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
 	TextView restaurantCount;
 	List<Restaurant> restaurants;
 	DataBase db;
+	TextView TEEEEST;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
