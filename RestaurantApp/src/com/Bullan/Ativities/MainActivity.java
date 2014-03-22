@@ -1,8 +1,16 @@
-package com.Bullan.Restaurant;
+package com.Bullan.Ativities;
 
 import java.util.List;
+import java.util.Random;
 
-import com.Bullan.Restaurant.MyLocation.LocationResult;
+import com.Bullan.BusinessLogic.MyLocation;
+import com.Bullan.BusinessLogic.MyLocation.LocationResult;
+import com.Bullan.BusinessObjects.Restaurant;
+import com.Bullan.DataBase.DataBase;
+import com.Bullan.Restaurant.R;
+import com.Bullan.Restaurant.R.id;
+import com.Bullan.Restaurant.R.layout;
+import com.Bullan.Restaurant.R.menu;
 
 import android.R.string;
 import android.location.Location;
@@ -33,32 +41,14 @@ public class MainActivity extends Activity {
 		restaurantCount = (TextView)findViewById(R.id.textView2);
 		
 		db = new DataBase(this);
-		
-		if(db.getContactsCount() == 0)
-		{
-			
-			Log.d("Insert: ", "Inserting...");
-			db.addRestaurant(new Restaurant("Hamborgarabúllan", 4, "Hamborgarar"));
-			db.addRestaurant(new Restaurant("Hamborgara Fabrikkan", 3, "Hamborgarar"));
-			db.addRestaurant(new Restaurant("Noodle Station", 4, "Asískt"));
-			db.addRestaurant(new Restaurant("Svartakaffi", 4, "Súpur"));
-			db.addRestaurant(new Restaurant("Devitos", 3, "Pizza"));
-			db.addRestaurant(new Restaurant("Nings", 1, "Asískt"));
-			db.addRestaurant(new Restaurant("Laundromat", 4, "Venjulegt"));
-			db.addRestaurant(new Restaurant("Argentina", 4, "Steikhús"));
-			db.addRestaurant(new Restaurant("Kolabrautin", 4, "Fine dine"));
-			db.addRestaurant(new Restaurant("Hlöllabátar", 2, "Samlokur"));
-		}
 			
 		Log.d("Reading ", "Reading all contacts..");
 		restaurants = db.getAllRestaurants();
 		
 		for(Restaurant rst : restaurants){
-			String log = "Id: " + rst.getId() + ", Name: " + rst.getName();
-			Log.d("Name: ", log);
+			String log = "Id: " + rst.Id + ", Name: " + rst.Name;
+			Log.d("Restaurant: ", log);
 		}
-		
-//		restaurantCount.setText(restaurants.size()+"");
 	}
 
 	@Override
@@ -86,13 +76,15 @@ public class MainActivity extends Activity {
 	{
 		Restaurant restaurant = null;
 		try{
-			restaurant = db.getRandomRestaurant();
+			Random r = new Random();
+			int rNumber = r.nextInt((restaurants.size()));
+			restaurant = restaurants.get(rNumber);
 		}catch (Exception e){ Log.d("Catched Error: ", e.getMessage());}
 		
 		if(restaurant == null)
 			locationText.setText("Fail");
 		else
-			locationText.setText(restaurant.getName().toString());
+			locationText.setText(restaurant.Id+", "+restaurant.Name+", "+restaurant.Location.Latitude+", "+restaurant.Location.Longitude);
 	}
 
 }

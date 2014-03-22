@@ -1,4 +1,4 @@
-package com.Bullan.Restaurant;
+package com.Bullan.BusinessLogic;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.content.Context;
