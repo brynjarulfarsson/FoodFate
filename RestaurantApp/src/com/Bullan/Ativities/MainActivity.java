@@ -1,24 +1,33 @@
 package com.Bullan.Ativities;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
 
 import com.Bullan.BusinessLogic.MyLocation;
 import com.Bullan.BusinessLogic.MyLocation.LocationResult;
+import com.Bullan.BusinessLogic.MySimpleArrayAdapter;
+import com.Bullan.BusinessObjects.AppLocation;
 import com.Bullan.BusinessObjects.Restaurant;
 import com.Bullan.DataBase.DataBase;
+import com.Bullan.GoogleManager.PlacesAPI;
 import com.Bullan.Restaurant.R;
-import com.Bullan.Restaurant.R.id;
-import com.Bullan.Restaurant.R.layout;
-import com.Bullan.Restaurant.R.menu;
 
-import android.R.string;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,15 +39,20 @@ public class MainActivity extends Activity {
 	List<Restaurant> restaurants;
 	DataBase db;
 	TextView TEEEEST;
+	ListView resultListView;
+	AppLocation currLocation;
+	public Location currentLocation;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		
 		myLocation = new MyLocation();
-		locationText = (TextView)findViewById(R.id.textView1);
+//		locationText = (TextView)findViewById(R.id.textView1);
 		restaurantCount = (TextView)findViewById(R.id.textView2);
+		resultListView = (ListView)findViewById(R.id.listView1);
 		
 		db = new DataBase(this);
 			
@@ -58,33 +72,103 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
-	public void GetLocation(View view){
+//	public void GetLocation(View view){
+//		LocationResult locationResult = new LocationResult(){
+//			@Override
+//			public void gotLocation(Location location) {
+////				Toast.makeText(getApplicationContext(), "Latitude: "+location.getLatitude()+"\n Longitude: "+location.getLongitude() , Toast.LENGTH_SHORT).show();
+////				Toast.makeText(getApplicationContext(), "Binni", Toast.LENGTH_SHORT).show();
+//				 currLocation = new AppLocation(location.getLatitude(),location.getLongitude());
+//			}
+//		};
+//		boolean worked = myLocation.getLocation(this, locationResult);
+//		
+//		Toast.makeText(getApplicationContext(),worked+" ",Toast.LENGTH_SHORT).show();
+//	}
+	
+	public boolean getLocation()
+	{
 		LocationResult locationResult = new LocationResult(){
 			@Override
 			public void gotLocation(Location location) {
 				Toast.makeText(getApplicationContext(), "Latitude: "+location.getLatitude()+"\n Longitude: "+location.getLongitude() , Toast.LENGTH_SHORT).show();
 //				Toast.makeText(getApplicationContext(), "Binni", Toast.LENGTH_SHORT).show();
+				if(location != null)
+				{
+					try {
+						MainActivity.this.responseFromLocation(location);
+					} catch (ClientProtocolException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		};
 		boolean worked = myLocation.getLocation(this, locationResult);
-		
-		
-		locationText.setText(worked+" ");
+
+		Toast.makeText(getApplicationContext(),worked+" ",Toast.LENGTH_SHORT).show();
+		return worked;
 	}
 	
-	public void getRestaurant(View view)
+	public void responseFromLocation(Location location) throws ClientProtocolException, IOException, JSONException
 	{
-		Restaurant restaurant = null;
-		try{
-			Random r = new Random();
-			int rNumber = r.nextInt((restaurants.size()));
-			restaurant = restaurants.get(rNumber);
-		}catch (Exception e){ Log.d("Catched Error: ", e.getMessage());}
+		currentLocation = location;
 		
-		if(restaurant == null)
-			locationText.setText("Fail");
+		ArrayList<Restaurant> restaurants = new ArrayList<Restaurant>();
+		if(currentLocation==null)
+			restaurants.add(new Restaurant("No coordinates", 0,0));
 		else
-			locationText.setText(restaurant.Id+", "+restaurant.Name+", "+restaurant.Location.Latitude+", "+restaurant.Location.Longitude);
+			restaurants = PlacesAPI.getAllRestaurants(new AppLocation(currentLocation.getLatitude(),currentLocation.getLongitude()), 2000);
+		
+		MySimpleArrayAdapter adapter = new MySimpleArrayAdapter(this, restaurants);
+		
+		resultListView.setAdapter(adapter);
+	}
+	
+//	public AppLocation getLocation()
+//	{
+//		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+//		boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+//
+//		// check if enabled and if not send user to the GSP settings
+//		// Better solution would be to display a dialog and suggesting to 
+//		// go to the settings
+//		if (!enabled) {
+//		  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//		  startActivity(intent);
+//		} 
+//		
+//		
+//		Criteria criteria = new Criteria();
+//		String provider = locationManager.getBestProvider(criteria, false);
+//		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 1000, );
+//		Location location = locationManager.getLastKnownLocation(provider);
+//		
+//		if(location != null)
+//		{
+//			currLocation = new AppLocation(location.getLatitude(), location.getLongitude());
+//			Toast.makeText(getApplicationContext(),location.getAccuracy()+" ",Toast.LENGTH_SHORT).show();
+//		}
+//	}
+	
+	public void getRestaurant(View view) throws IOException, JSONException
+	{
+		
+		
+		
+		
+		boolean isLocation = getLocation();
+		
+		
+		
+//		locationText.setText(length);
+	
 	}
 
 }

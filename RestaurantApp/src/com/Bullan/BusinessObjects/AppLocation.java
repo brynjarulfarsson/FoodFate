@@ -1,16 +1,16 @@
 package com.Bullan.BusinessObjects;
 
-public class Location {
+public class AppLocation {
 	public double Latitude;
 	public double Longitude;
 	
-	public Location(double latitude, double longitude)
+	public AppLocation(double latitude, double longitude)
 	{
 		Latitude = latitude;
 		Longitude = longitude;
 	}
 	
-	public double CalculateDistance(Location toLocation)
+	public double CalculateDistance(AppLocation toLocation)
 	{
 		return 3.4;
 	}
